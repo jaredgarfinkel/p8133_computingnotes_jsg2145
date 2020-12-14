@@ -1,0 +1,63 @@
+---
+title: "20201214-p8133_computingnotes_jsg2145"
+author: "Jared Garfinkel"
+date: "12/14/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(viridis)
+library(rstan)
+knitr::opts_chunk$set(
+	echo = TRUE,
+	warning = FALSE,
+	message = FALSE,
+	cache = TRUE,
+	fig.width = 8, 
+  fig.height = 6,
+  out.width = "90%"
+)
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+```
+
+```{r}
+y = c(6, 1, 10, 0, 11, 1, 0, 1, 11, 0, 6, 0, 9, 11, 25, 1)
+S = c(17, 7, 25, 1, 20, 3, 3, 1, 27, 3, 16, 0, 23, 14, 39, 4)
+Drug = rep(c("Erlotinib", "Erlotinib+bexaorotane", "Vandetanib", "Sorafenib"), each = 4)
+Marker = rep(c("EGFR", "KRAS/BRAF", "VEGF", "RXR/Cyclin D1"), times = 4)
+mydata = data.frame(y, S, Drug, Marker)
+```
+
+```{r}
+mydata1 = mydata %>%filter(Drug == "Erlotinib+bexaorotane" & Marker == "EGFR")
+stan_data = list(y = mydata1$y, n = mydata1$S)
+stan_fit1 = stan(file = "1Binomial.stan", data = stan_data, warmup = 500,iter = 1000, chains = 4, seed = 1)
+print(stan_fit1)
+```
+
+```{r}
+posterior_theta = unlist(extract(stan_fit1, "theta"))
+hist(posterior_theta)
+```
+
+```{r}
+mydata2 = mydata %>%filter(Drug == "Erlotinib+bexaorotane" & Marker == "EGFR")
+stan_data = list(y = mydata2$y, n = mydata2$S)
+stan_fit2 = stan(file = "2Binomial.stan", data = stan_data, warmup = 500,iter = 1000, chains = 4, seed = 1)
+print(stan_fit2)
+```
+
+```{r}
+mydata3 = mydata[which(mydata$Drug == "Erlotinib+bexaorotane"),]
+stan_data = list(N = 4, y = mydata3$y, n = mydata3$S)
+stan_fit3 = stan(file = "3BinomialHierarchical.stan", data = stan_data, warmup = 500,iter = 1000, chains = 4, seed = 1)
+print(stan_fit3)
+```
+
