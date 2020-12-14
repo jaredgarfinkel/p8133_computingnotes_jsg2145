@@ -36,7 +36,7 @@ mydata = data.frame(y, S, Drug, Marker)
 ```
 
 ```{r}
-mydata1 = mydata %>%filter(Drug == "Erlotinib+bexaorotane" & Marker == "EGFR")
+mydata1 = mydata %>%filter(Drug == "Sorafenib" & Marker == "EGFR")
 stan_data = list(y = mydata1$y, n = mydata1$S)
 stan_fit1 = stan(file = "1Binomial.stan", data = stan_data, warmup = 500,iter = 1000, chains = 4, seed = 1)
 print(stan_fit1)
@@ -45,10 +45,11 @@ print(stan_fit1)
 ```{r}
 posterior_theta = unlist(extract(stan_fit1, "theta"))
 hist(posterior_theta)
+
 ```
 
 ```{r}
-mydata2 = mydata %>%filter(Drug == "Erlotinib+bexaorotane" & Marker == "EGFR")
+mydata2 = mydata %>%filter(Drug == "Sorafenib" & Marker == "EGFR")
 stan_data = list(y = mydata2$y, n = mydata2$S)
 stan_fit2 = stan(file = "2Binomial.stan", data = stan_data, warmup = 500,iter = 1000, chains = 4, seed = 1)
 print(stan_fit2)
